@@ -1,8 +1,9 @@
-#Solving Newton Cooling via Euler's Method
-#Drew Coffin
-#January 25, 2017
-#Python 3.5
-
+"""
+Solving Newton Cooling via Euler Method
+Drew Coffin
+January 25, 2017
+Python 3.5
+"""
 #Necessary modules
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,8 +18,8 @@ def GetArrays():
 def constants(times, Temps):
     T0 = Temps[0] #initial temperature
     tf = times[-1] #Gets final time value
-    Tair = 46 #ambient temperature
-    R = 0.08 #rate of cooling
+    Tair = 25 #ambient temperature
+    R = 0.042 #rate of cooling
     return T0, tf, Tair, R
 
 def Euler(tf, T0, R, nsteps):
@@ -40,3 +41,12 @@ plt.plot(times, Temps, Eulertimes, EulerTemps) #Make the plot
 plt.xlabel('time (min)')
 plt.ylabel('Temp (C)')
 plt.show()    
+
+'''
+Part c:
+Estimate M = 0.300 kg (about 10 ounces).
+Estimate A = 25 square centimeters (.0025 square meters)
+
+0.0237*.0075/(.042*.3*4.19*10**3)
+Out[56]: 3.3668598704398217e-06 m
+'''
