@@ -43,10 +43,12 @@ plt.ylabel('Temp (C)')
 plt.show()    
 
 '''
-Part c:
+Part C:
 Estimate M = 0.300 kg (about 10 ounces).
 Estimate A = 25 square centimeters (.0025 square meters)
 
-0.0237*.0075/(.042*.3*4.19*10**3)
+In[56]: 0.0237*.0075/(.042*.3*4.19*10**3)
 Out[56]: 3.3668598704398217e-06 m
+
+Part D
 '''

@@ -13,8 +13,25 @@ import math as m
 def initial():
     start = 1 #initial value
     return start
+    
+#Is this a Modified or Improved Euler?
+def coeffs(flag):
+    if flag.strip() == 'mod':
+        alpha = 0.5
+        gamma1 = 0 #Clear any old value
+        gamma2 = 1 
+    if flag.strip() == 'imp':
+        alpha = 1
+        gamma1 = 0.5
+        gamma2 = 0.5
+    else: #Variable coefficients
+        alpha = 0.7
+        gamma1 = 0.7
+        gamma2 = 0.7
+    return alpha, gamma1, gamma2
 
-def Euler(y0, nsteps):
+def ModEuler(y0, nsteps):
+    a,g1,g2 = coeffs('mod')
     deltime = 1/nsteps #length of a time step
     newtimes = np.arange(0,1,deltime) #Generates n time points
     newvals = []
@@ -27,13 +44,13 @@ def Euler(y0, nsteps):
 
 #Main program    
 y0 = initial()
-times, vals = Euler(y0, 2501) #The Euler method
+times, vals = ModEuler(y0, 100) #The Euler method
 plt.plot(times, vals) #Make the plot
-plt.xlabel('x')
+plt.xlabel('delta x')
 plt.ylabel('y value')
 plt.show()   
-print('Value is ' + str((vals[-1]/m.exp(-1) - 1)*100) + '% off')
+print((vals[-1]/m.exp(-1) - 1)*100) #How accurate am I?
 
 '''
-Returned accuracy is 0.019996667330324236 percent off
+Returned accuracy is percent off
 '''
