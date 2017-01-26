@@ -19,7 +19,7 @@ def constants(times, Temps):
     T0 = Temps[0] #initial temperature
     tf = times[-1] #Gets final time value
     Tair = 25 #ambient temperature
-    R = 0.042 #rate of cooling
+    R = 0.0405 #rate of cooling
     return T0, tf, Tair, R
 
 def Euler(tf, T0, R, nsteps):
@@ -36,7 +36,7 @@ def Euler(tf, T0, R, nsteps):
 #Main program
 times, Temps = GetArrays()
 T0, tf, Tair, R = constants(times, Temps)
-Eulertimes, EulerTemps = Euler(tf, T0, R, 100) #The Euler method
+Eulertimes, EulerTemps = Euler(tf, T0, R, 1000) #The Euler method
 plt.plot(times, Temps, Eulertimes, EulerTemps) #Make the plot
 plt.xlabel('time (min)')
 plt.ylabel('Temp (C)')
@@ -47,8 +47,24 @@ Part C:
 Estimate M = 0.300 kg (about 10 ounces).
 Estimate A = 25 square centimeters (.0025 square meters)
 
-In[56]: 0.0237*.0075/(.042*.3*4.19*10**3)
-Out[56]: 3.3668598704398217e-06 m
+In [45]: 0.0237*.0075/(.0405*.3*4.19*10**3)
+Out[45]: 3.4915583841598156e-06 
 
 Part D
+'''
+deltimearr = []
+diffarr = []
+for i in range(1,1000):
+    deltimearr.append(60*tf/i)
+    Eulertimes, EulerTemps = Euler(tf, T0, R, i) #The Euler method
+    diffarr.append(EulerTemps[-1] - Temps[-1])
+plt.plot(deltimearr, diffarr)
+plt.xlabel('timestep (s)')
+plt.xlim([0,50])
+plt.ylim([0,0.5])
+plt.ylabel('Temp difference (C)')
+plt.show()    
+
+'''
+As can be seen from the window, the Eurler method is first order (linear) in time.
 '''
