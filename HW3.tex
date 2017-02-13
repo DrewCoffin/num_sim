@@ -1,0 +1,93 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+
+\title{Numerical Simulations Homework \texttt{\#} 3}
+\author{Drew Coffin}
+\date{February 8, 2017} 
+
+\usepackage{cancel} 
+
+\begin{document}
+\maketitle
+
+\section{Problem 1}
+
+\subsection{Part a}
+Our exact function is $\widetilde{T}$, which has the general Taylor series:
+
+\[ \frac{\partial \widetilde{T}}{\partial x} = \widetilde{T}(x_0) + \Delta x \frac{\partial \widetilde{T}}{\partial x} + \frac{\Delta x^2}{2} \frac{\partial^2 \widetilde{T}}{\partial x^2} + \frac{\Delta x^3}{6} \frac{\partial^3 \widetilde{T}}{\partial x^3} + ... \]
+
+We are approximating this derivative via three pieces: a spatial step "back," the current location, and a spatial step forward:
+\[ \bigg[ \frac{\partial \widetilde{T}}{\partial x} \bigg]^n_j = a \widetilde{T}^n_{j-1} + b \widetilde{T}^n_j + c \widetilde{T}^n_{j+1} + O(\Delta x^m)\]
+and either of the two spatial steps can be expressed as Taylor series. The $\widetilde{T}^n_{j-1}$ term is with a spatial step of $-\Delta x$, meaning its Taylor series, with a coefficient of $a$, will \textit{alternate} sign. Meanwhile, the $\widetilde{T}^n_{j+1}$ term is with a spatial step of $+ \Delta x$. Our current position, $\widetilde{T}^n_j$, has no associated $\Delta x$, giving us only the $b \widetilde{T}^n_j $ term. Combine these two series and our $b \widetilde{T}^n_j$ term and we have
+
+\[ \bigg[ \frac{\partial \widetilde{T}}{\partial x} \bigg]^n_j = (a +b+c) \widetilde{T}^n_j + (-a+c) \Delta x \bigg[ \frac{\partial \widetilde{T}}{\partial x}\bigg]^n_j + (a+c) \frac{\Delta x^2}{2} \bigg[ \frac{\partial^2 \widetilde{T}}{\partial x^2}\bigg]^n_j + (-a+c) \frac{\Delta x^3}{6} \bigg[ \frac{\partial^3 \widetilde{T}}{\partial x^3}\bigg]^n_j + ... \]
+
+\subsection{Part b}
+Since we have
+\[ \bigg[ \frac{\partial \widetilde{T}}{\partial x} \bigg]^n_j = a \widetilde{T}^n_{j-1} + b \widetilde{T}^n_j + c \widetilde{T}^n_{j+1} + O(\Delta x^m)\]
+we know that our coefficients of $\widetilde{T}^n_j$ must vanish, i.e. $a+b+c = 0$. Likewise, we want $(-a+c) \Delta x = 1$ to return our first order derivative. Thus, $a = c - 1/\Delta x$ and $b = -2c + 1/\Delta x$. Note that since $a$ and $c$ depend on $1/\Delta x$, the term we wish to eliminate in our Taylor approximation is the $(a+c) \Delta x^2$ term. Thus, $a = -c =-1/2 \Delta x$ and $b = 0$. This gives us a final approximation of
+
+\[ \bigg[ \frac{\partial \widetilde{T}}{\partial x} \bigg]^n_j =  \frac{\widetilde{T}^n_{j+1} - \widetilde{T}^n_{j-1}}{2 \Delta x} + O(\Delta x^2)\]
+
+\subsection{Part c}
+Working with the second derivative, now we want $(a+c)\Delta x^2/2 = 1$, so $a = -c +2/\Delta x^2$, and we also know $(-a+c)\Delta x^3/6 = 0$ to zero out what will become our $\Delta x$ term. So $a =c =1/\Delta x^2$, and from our first term, $a + b + c = 0$ so $ b = -2/\Delta x^2$. Thus we obtain
+
+\[ \bigg[ \frac{\partial^2 \widetilde{T}}{\partial x^2} \bigg]^n_j =  \frac{\widetilde{T}^n_{j+1} - 2 \widetilde{T}^n_j + \widetilde{T}^n_{j-1}}{\Delta x^2} + O(\Delta x^2)\]
+
+\section{Problem 2}
+
+\subsection{Part a}
+For $y = \sin \pi x/2$, we are evaluating $dy/dx$ at $x= 0.5$. Explicitly, $dy/dx = (\pi/2) \cos \pi x / 2$.
+
+Three point symmetric error:
+
+\[ \frac{dy}{dx} \approx \frac{y_{j+1} - y_{j-1}}{2 \Delta x} = \frac{\sin 0.3 \pi - \sin 0.2 \pi}{2 \times 0.1} \approx 1.10616  \]
+
+Our error is $\pi/2 \cos \pi x/2$ minus the above, which is -0.0045620.
+
+We compare this to 
+\[ \Delta x^2 \frac{f_{xxx}}{6} = (0.1^2) \frac{(-\pi/2)^3 \cos 0.25 \pi}{6} \approx  -0.0045677\]
+which differs by 5 parts in one million.
+\\
+Forward difference:
+
+\[ \frac{dy}{dx} \approx \frac{y_{j+1} - y_j}{\Delta x} = \frac{\sin 0.3 \pi - \sin 0.25 \pi}{ 0.1} \approx 1.019102  \]
+
+Our error is $\pi/2 \cos \pi x/2$ minus the above, which is 0.091618.
+
+We compare this to 
+\[ \Delta x \frac{f_{xx}}{2} = 0.1 \frac{(\pi/2)^2 (-\sin 0.25 \pi)}{2} \approx 0.01935900\]
+which differs by eight parts in one hundred.
+\\
+Five point symmetric error:
+
+\[ \frac{dy}{dx} \approx \frac{y_{j+2} - 8 y_{j+1} + 8 y_{j-1} - y_{j-2}}{12 \Delta x} \approx 1.1106982  \]
+
+Our error is $\pi/2 \cos \pi x/2$ minus the above, which is $2.2474 \times 10^{-5}$.
+
+We compare this to 
+\[ \Delta x^4 \frac{f_{xxxxx}}{30} = 10^{-5} \frac{(\pi/2)^5 (\cos 0.25 \pi)}{30} \approx 3.177879 \times 10^{-6}\]
+
+\section{Problem 3}
+
+\subsection{Part a}
+Our equation is
+\[ \frac{\partial \widetilde{T}}{\partial t} - \alpha \frac{\partial^2 \widetilde{T}}{\partial x^2} = 0 \]
+
+We insert our first and second derivative expanisons from Problem 1 and include only first-order terms. Note we only have a forward step in time, not a centered derivative like in the spatial terms. 
+
+\[ \frac{\widetilde{T}^{n+1}_j - \widetilde{T}^n_j}{\Delta t} - \alpha  \frac{\widetilde{T}^n_{j+1} - 2 \widetilde{T}^n_j + \widetilde{T}^n_{j-1}}{\Delta x^2} = 0 \]
+
+\[ \widetilde{T}^{n+1}_j - \widetilde{T}^n_j = \frac{\alpha \Delta t}{\Delta x^2} \left({\widetilde{T}^n_{j+1} - 2 \widetilde{T}^n_j + \widetilde{T}^n_{j-1}}\right) \]
+
+Let $\alpha \Delta t/\Delta x^2 = s$, so we have
+
+\[ \widetilde{T}^{n+1}_j = \widetilde{T}^n_j + s \left({\widetilde{T}^n_{j+1} - 2 \widetilde{T}^n_j + \widetilde{T}^n_{j-1}}\right) \]
+
+\[ \widetilde{T}^{n+1}_j =  s\widetilde{T}^n_{j+1}+ (1 - 2s) \widetilde{T}^n_j + s \widetilde{T}^n_{j-1} \]
+
+\subsection{Part c}
+The five-point symmetric scheme should converge much more rapidly. 
+
+\end{document}
