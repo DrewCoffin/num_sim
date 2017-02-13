@@ -1,0 +1,91 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+
+\title{Numerical Simulations Homework \texttt{\#} 2}
+\author{Drew Coffin}
+\date{February 1, 2017} 
+
+\usepackage{cancel} 
+
+\begin{document}
+\maketitle
+
+\section{Problem 1}
+
+\subsection{Part a}
+
+The given problem is 
+\begin{equation} \label{eq:1}
+\frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} = 0, \qquad 0 < x < 1 \quad 0 < y < 1 
+\end{equation}
+
+We are given that $T(0, y) = T(1, y) = T(x,1) = 0$ and $T(x,0) = T_o$, i.e. a unit square with a value of 1 along the x-axis and $0$ along the other sides. Let us presume $T(x, y) = X(x)Y(y)$. Substitute into Eq. 1 and divide through by $T(x,y)$:
+
+\[   \frac{1}{X} \frac{\partial^2 X}{ \partial x^2} +  \frac{1}{Y} \frac{\partial^2 Y}{\partial y^2} = 0 \]
+
+\[   \frac{1}{X} \frac{\partial^2 X}{ \partial x^2} = -  \frac{1}{Y} \frac{\partial^2 Y}{\partial y^2} \]
+
+This is satisfied by letting $X(x) = A \sin(n \pi x)$ with n as yet being undetermined. Meanwhile, $Y(y)$ has the form of a exponential decay; however no individual expression of the form $\sinh{y}$  will satisfy both conditions. Instead, we use a Fourier series of the form:
+
+\[ T(x, y) = \sum_{n=1}^{\infty} A_n \sin(n \pi x) \sinh[n \pi \left( 1 - y)\right] \]
+
+and $A_n$ is determined by
+\[ A_n = \frac{2 T_o}{ \sinh(n \pi)} \int_{0}^{1} \sin(n \pi x) dx\]
+
+\[ A_n = \frac{4 T_o}{n \pi  \sinh(n \pi)}\]
+From the shape of the graph, only the odd $A_n$ terms contribute.
+
+Now, we plot.
+
+\subsection{Part c}
+The given problem is 
+\begin{equation} \label{eq:2}
+\frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} = 0, \qquad 0 < x < 1 \quad 0 < y < 1 
+\end{equation}
+
+We are given that $T(0, y) = T(1, y)  = 0$ and $T(x,0) = T(x,1) = T_o$, i.e. a unit square with a value of 1 along bothsides parallel to the x-axis and $0$ along the sides parallel to the y-axis. The solution follows precisely above, except we will use a $cosh(y)$ expression shifted to center on $y = 1/2$, to give us the symmetric "valley" shape.
+
+I.e.
+
+\[ T(x, y) = \sum_{n=1}^{\infty} B_n \sin(n \pi x)  \cosh[n \pi \left(y - 1/2)\right] \] 
+with $B_n$ being \[ B_n = \frac{4 T_o}{n \pi  \cosh(n \pi / 2)}\]
+Again, we only retain odd $B_n$ terms.
+
+\section{Problem 2}
+
+\subsection{Part a}
+
+The given equation is $\partial^2 u/\partial x \partial t = 0$ and we wish to know what type of second-order PDE it is. The type is determined by the discriminant of the coefficients of the second-order derivatives of our function $u(x,y)$: 
+
+\[ A \frac{\partial^2 u}{ \partial x^2} + B \frac{\partial^2 u}{ \partial x \partial y} + C \frac{\partial^2 u}{ \partial y^2} + D(x,y) = 0 \]
+
+If $B^2 - 4 A C > 0$, our equation is hyperbolic.
+
+If $B^2 - 4 A C = 0$, our equation is parabolic.
+
+If $B^2 - 4 A C < 0$, our equation is elliptic.
+
+$B^2 - 4 A C $ in our case will be $1^2 - 4 \cdot 0 \cdot 0  = 1 > 0 $ so our equation is hyperbolic.
+
+\subsection{Part b}
+
+The given system of equations is ${\partial v}/{\partial x} = 0$ and ${\partial u}/{\partial t} - v= 0$.
+
+If we take a spatial derivative of the second equation, we achieve:
+
+\[ \frac {\partial} {\partial x} \left( \frac {\partial u}{\partial t} - v \right) = 0\]
+\[ \frac {\partial^2 u}{\partial x \partial t} - \cancelto{0}{\frac {\partial v}{\partial x}} = 0\]
+\[  \frac {\partial^2 u}{\partial x \partial t} = 0\]
+as above, hence this is a hyperbolic equation.
+
+For finding characteristics, we wish to find total time derivatives. 
+
+\[ \frac {\partial v}{\partial x} = 0 \]
+
+\[\frac {\partial}{\partial x} \frac {d x}{dt}= 0 \]
+
+\[\frac {d}{dt} \frac {\partial x}{\partial x} = 0 \]
+
+We have lost our x-dependence, thus we know we have no information about our equation based on the domain. Thus, only our coordinates, and thus their axes, give us characteristics.
+
+\end{document}
