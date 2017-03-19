@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import numpy as np
     
 '''What was our initial condition?''' 
-def initial(z,delx):
+def initial(z):
     z0 = 0.05
-    u0 = rho0 = 1
-    vinit = rho0 = np.zeros(shape=(3,len(z)))
+    u0 = 1
+    vinit = np.zeros(shape=(3,len(z)))
     vinit[0,:] = u0*np.exp(-(z[:]/z0)**2) #Note x is 0th row
-    return vinit, rho0
+    return vinit
     
 '''Leapfrog one liner'''
 def leapfrog(C,t0, t1):
@@ -23,13 +23,14 @@ def leapfrog(C,t0, t1):
     t2[2,1:-1] = t0[1:-1] - C * (t1[2:] - t1[:-2]) 
     return t2
     
-'''Lax-Wendroff one liner'''
+'''Lax-Wendroff'''
 def lax(C,dens,vel,old):
-    newstar = new = np.zeros(len(old))
+    half = new = np.zeros(len(old))
     flux = massflux(dens,vel)
-    newstar[1:-1] = 0.5*(old[1:-1]+old[2:]) - 0.5*C*(flux[2:] + -1*flux[1:-1])
-    new[1:-1] = old[1:-1] - C * (newstar[1:-1]*vel[1:-1] - newstar[:-2]*vel[:-2])
-    return newstar
+    half[1:-1] = 0.5*(old[1:-1]+old[2:]) - 0.5*C*(flux[2:] + -1*flux[1:-1])
+    newflux = np.array([half[i]*vel[0,i] for i in range(len(half))])
+    new[1:-1] = old[1:-1] - C * (newflux[1:-1] + -1*newflux[:-2])
+    return new, newflux
     
 '''Quick transposing'''
 def star(a):
@@ -62,13 +63,17 @@ c = delt/zstep
 
 '''Generate initial conditions'''
 zarr = np.arange(0,1+zstep,zstep)
-initarr = initial(zarr,zstep)
+v0 = initial(zarr)
+#print(v0)
 dens0 = np.ones(len(zarr))
 B0 = [np.zeros(len(zarr)), np.zeros(len(zarr)), np.ones(len(zarr))] #B only in z direction
 #print(initarr[2], len(initarr[2]))
 
-'''Do the initial steps for each method to overwrite initarr'''
-laxarr = lax(c, dens0[0], initarr[0], dens0)
+'''Do the initial steps for each method to overwrite v0'''
+laxdens,newflux = lax(c, dens0[0], v0, dens0)
+print(laxdens,newflux)
+newvel = [newflux[i]/laxdens[i] for i in range(len(laxdens))]
+#print(newvel)
 '''lf1 = leapfrog(c, initarr, laxarr) #First two steps for leapfrog
 lf2 = leapfrog(c, laxarr, lf1)'''
     
@@ -77,9 +82,9 @@ i = 1
 while i <= ntsteps: 
     leapfrogarr = leapfrog(c, lf1, lf2)
     [lf1, lf2] = [lf2, leapfrogarr] #Update multiple time steps
-    laxarr = lax(c,laxarr)
+    laxarr = lax(c,dens0[0], v0, laxvel)
     if int(i%25) == 0:
-        plt.plot(zarr, initarr[2], 'r--', zarr, laxarr, 'b--')
+        plt.plot(zarr, laxarr, 'b--')
     i += 1
  
 #plt.plot(zarr, initarr, 'r--', zarr, laxarr, 'b--')
