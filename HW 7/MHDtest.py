@@ -24,19 +24,26 @@ def leapfrog(C,t0, t1):
     return t2
     
 '''Lax-Wendroff'''
-def lax(C,dens,vel,old,flux):
-    half = new = np.ones(len(old))
-    half[1:-1] = 0.5*(old[1:-1]+old[2:]) - 0.5*C*(flux[2:] + -1*flux[1:-1])
-    newflux = np.array([half[i]*vel[0,i] for i in range(len(half))])
-    #print(half[90:110],vel[0,90:110])
-    new[1:-1] = old[1:-1] - C * (newflux[2:] + -1*newflux[1:-1])
-    return new, newflux
+def laxhalf(C,old,flux):
+    half = np.zeros(len(old))
+    half[:-1] = 0.5*(old[:-1]+old[1:]) - 0.5*C*(flux[1:] + -1*flux[:-1])
+    half[-1] = 0.5*(old[-1]+old[0]) - 0.5*C*(flux[0] + -1*flux[-1]) #Periodic boundary
+    return half
+    
+def lax(C,old,half,halfvel):
+    new = np.zeros(len(half))
+    newflux = np.array([half[i]*halfvel[i] for i in range(len(halfvel))])
+    #print(newflux)
+    new[1:] = old[1:] - C * (newflux[1:] + -1*newflux[:-1])
+    new[0] = old[0] - C * (newflux[0] + -1*newflux[-1]) #Periodic boundary
+    return new
     
 '''Quick transposing'''
 def star(a):
-    return list(map(list,zip(*a)))    
+    return np.array(map(list,zip(*a)))    
     
 '''MHD equations'''
+
 def Fmass(dens,vel):
     return np.array([dens*vel[0][i] for i in range(len(vel[0]))])
     
@@ -57,7 +64,7 @@ def Fmag(B0,vel):
     return np.dot(vtrans,B0[2]) - np.dot(Btrans,vel[0]) 
 
 # Grid resolution
-delt = 0.08
+delt = 0.008
 zstep = 0.01
 nzsteps = 1/zstep
 ntsteps = 1/delt
@@ -66,25 +73,30 @@ c = delt/zstep
 '''Generate initial conditions'''
 zarr = np.arange(-1,1+zstep,zstep)
 v0 = initial(zarr)
-dens0 = p0 = np.ones(len(zarr))
+dens0 = np.ones(len(zarr))
+p0 = np.ones(len(zarr))
 #B only in z direction
 B0 = np.zeros(shape=(3,len(zarr)))
 B0[2] = np.ones(len(zarr))
-mom0 = [dens0[i]*v0[0,i] for i in range(len(zarr))]
+mom0 = np.zeros(shape=(3,len(zarr)))
+mom0[0] = [dens0[i]*v0[0,i] for i in range(len(zarr))]
+#print(mom0)
 
-'''Do the initial step for the continuity equation'''
+'''Do the initial iteration'''
 massflux = Fmass(dens0[0],v0)
-laxdens,newmassflux = lax(c, dens0[0], v0, dens0,massflux)
-newvel = np.zeros(shape=(3,len(zarr)))
-newvel[0] = [newmassflux[i]/laxdens[i] for i in range(len(laxdens))]
-
-'''Initial step for momentum equation'''
-momflux = Fmom(dens0[0],v0,p0,B0)
-laxmom,newmomflux = lax(c, dens0[0], v0, mom0, momflux)
-
-'''Initial step for Faraday's Law'''
+momflux = Fmom(dens0[0],v0,p0[0],B0)
 magflux = Fmag(B0,v0)
-laxmag,newmagflux = lax(c, dens0[0], v0, B0[2],magflux)
+rhohalf = laxhalf(c,dens0,massflux)
+momhalf = laxhalf(c,mom0[0],momflux)
+maghalf = laxhalf(c,B0[2],magflux)
+halfvel = np.zeros(shape=(3,len(zarr)))
+halfvel[0] = [momhalf[i]/rhohalf[i] for i in range(len(momhalf))]
+newrho = lax(c,dens0[0],rhohalf,halfvel[0])
+newmom = lax(c,mom0[0],momhalf,halfvel[0])
+newmag = lax(c,B0[0],maghalf,halfvel[0])
+newvel = [newmom[i]/newrho[i] for i in range(len(newmom))]
+
+'''Mag equation to update B0, then lax full step for new values'''
 
 '''lf1 = leapfrog(c, initarr, laxarr) #First two steps for leapfrog
 lf2 = leapfrog(c, laxarr, lf1)'''
@@ -92,11 +104,19 @@ lf2 = leapfrog(c, laxarr, lf1)'''
 '''Iterative loop'''
 i = 1
 while i <= ntsteps: 
-    #leapfrogarr = leapfrog(c, lf1, lf2)
-    #[lf1, lf2] = [lf2, leapfrogarr] #Update multiple time steps
-    laxdens, newmassflux = lax(c,laxdens[0], newvel, laxdens,newmassflux)
-    newvel[0] = [newmassflux[i]/laxdens[i] for i in range(len(laxdens))]
-    if int(i%10) == 0:
+    massflux = Fmass(newrho,newvel)
+    momflux = Fmom(newrho,newvel,p0[0],newmag)
+    magflux = Fmag(newmag,newvel)
+    rhohalf = laxhalf(c,newrho,massflux)
+    momhalf = laxhalf(c,newmom,momflux)
+    maghalf = laxhalf(c,newmag,magflux)
+    halfvel = np.zeros(shape=(3,len(zarr)))
+    halfvel[0] = [momhalf[i]/rhohalf[i] for i in range(len(momhalf))]
+    newrho = lax(c,newrho,rhohalf,halfvel[0])
+    newmom = lax(c,newmom,momhalf,halfvel[0])
+    newmag = lax(c,newmag,maghalf,halfvel[0])
+    newvel = [newmom[i]/newrho[i] for i in range(len(newmom))]
+    if int(i%5) == 0:
         #print(i, laxdens)
         plt.plot(zarr, v0[0], 'r--', zarr, newvel[0], 'b--')
         #plt.plot(zarr, laxarr, 'b--')
