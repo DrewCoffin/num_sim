@@ -24,7 +24,7 @@ def vnew(vplus, delT, Eold):
     return np.array(vplus + delT*Eold)
 
 B0 = np.array([0,0,1])
-E0 = np.array([0,0.1,0])
+E0 = 0
 v0 = np.array([1,0,0])
 Tgyro = 2*np.pi/B0[2]
 Tfin = 10*Tgyro
@@ -37,14 +37,18 @@ i = 0
 pos = [float(pos0[j]) for j in range(len(pos0))] #Make sure initial position is in floats
 xarr = [pos[0]]
 yarr = [pos[1]]
+Bnew = np.zeros(3)
 vel = v0
 while i < ntsteps:
-    vp = vplus(vel,B0,delT)
+    Bnew[2] = B0[2]*pos[0]
+    vp = vplus(vel,Bnew,delT)
     vn = vnew(vp,delT,E0)
     pos += delT*vn
     vel = vn #Update the velocity
     xarr.append(pos[0])
     yarr.append(pos[1])
+    #if i/1000 - int(i/1000) == 0:
+     #   print(i) #tracker
     i += 1
 
 plt.plot(xarr, yarr, 'b')
